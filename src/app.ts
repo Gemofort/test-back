@@ -15,6 +15,7 @@ const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
 import carsRouter from './cars/cars.router';
 import routesRouter from './route/route.router';
+import errorCatcherMiddleware from './middlewares/errorCatcher';
 
 const app = new Koa();
 const router = Router();
@@ -62,6 +63,7 @@ app.use(bodyParser({
   multipart: true,
   includeUnparsed: true,
 }));
+app.use(errorCatcherMiddleware);
 app.use(helmet());
 
 app.use(

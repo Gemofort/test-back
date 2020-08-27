@@ -2,7 +2,7 @@ const pino = require('pino');
 
 const logger = pino({ name: 'server' });
 
-module.exports = async (ctx, next) => {
+export default async (ctx, next) => {
   try {
     await next();
   } catch (e) {
