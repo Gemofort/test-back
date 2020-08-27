@@ -3,13 +3,13 @@ import { CarType, CarStatus } from './schemas/car.schema';
 
 const joi = Router.Joi;
 
-const carBaseJoiSchema = {
+export const carBaseJoiSchema = {
   numberPlate: joi.string().required(),
   type: joi.string().valid(...Object.values(CarType)).required(),
   modelType: joi.string().required(),
   soldAt: joi.date().required(),
   mileage: joi.number().required(),
-  status: joi.string().valid(...Object.values(CarStatus)).required(),
+  status: joi.string().valid(...Object.values(CarStatus)),
 };
 
 export class CarsValidator {

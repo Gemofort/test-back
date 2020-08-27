@@ -14,6 +14,7 @@ type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middlewar
 const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
 import carsRouter from './cars/cars.router';
+import routesRouter from './route/route.router';
 
 const app = new Koa();
 const router = Router();
@@ -25,6 +26,7 @@ createConnection({ uri: config.get('database.url') });
 const generator = new SwaggerAPI();
 
 generator.addJoiRouter(carsRouter);
+generator.addJoiRouter(routesRouter);
 
 const spec = generator.generateSpec({
   info: {
@@ -37,6 +39,10 @@ const spec = generator.generateSpec({
     {
       name: 'cars',
       description: 'Group of API methods for managing cars',
+    },
+    {
+      name: 'routes',
+      description: 'Group of API methods for managing routes',
     },
   ],
 }, {
@@ -73,6 +79,7 @@ router.get('/', async (ctx) => {
 });
 
 router.use(carsRouter.middleware());
+router.use(routesRouter.middleware());
 
 app.use(router.middleware());
 

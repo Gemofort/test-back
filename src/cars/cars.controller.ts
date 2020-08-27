@@ -1,19 +1,19 @@
 import { Context } from 'koa';
 import * as mongoose from 'mongoose';
-import Car, { ICar } from './schemas/car.schema';
+import Car, { ICar, CarStatus } from './schemas/car.schema';
 
 const { ObjectId } = mongoose.Types;
 
 export class CarsController {
   static async createCar(ctx: Context) {
-    const { numberPlate, type, modelType, soldAt, mileage, status } = ctx.request.body;
+    const { numberPlate, type, modelType, soldAt, mileage } = ctx.request.body;
 
     const car = await (new Car({
       numberPlate,
       type,
       modelType,
       mileage,
-      status,
+      status: CarStatus.FREE,
       soldAt: new Date(soldAt),
     })).save();
 

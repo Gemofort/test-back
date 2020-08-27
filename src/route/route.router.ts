@@ -1,20 +1,26 @@
 import * as Router from 'koa-joi-router';
 
-import { CarsController } from './route.controller';
-import { CarsValidator } from './route.validator';
+import { RouteController } from './route.controller';
+import { RoutesValidator } from './route.validation';
 
-const carsRouter = Router();
+const routesRouter = Router();
 
-carsRouter.post(
-  '/cars',
-  CarsValidator.createCar,
-  CarsController.createCar,
+routesRouter.post(
+  '/routes',
+  RoutesValidator.createRoute,
+  RouteController.createRoute,
 );
 
-carsRouter.get(
-  '/cars/:carId',
-  CarsValidator.getCarById,
-  CarsController.getCarById,
+routesRouter.get(
+  '/routes/:routeId/cars',
+  RoutesValidator.availableCarsToRoute,
+  RouteController.availableCarsToRoute,
 );
 
-export default carsRouter;
+routesRouter.delete(
+  '/routes/:routeId',
+  RoutesValidator.removeRoute,
+  RouteController.removeRoute,
+);
+
+export default routesRouter;

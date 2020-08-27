@@ -1,34 +1,35 @@
 import * as Router from 'koa-joi-router';
-import { CarType, CarStatus } from './schemas/car.schema';
+import { CarType } from '../cars/schemas/car.schema';
+import { DeliveryStatus } from './schemas/route.schema';
+import { carBaseJoiSchema } from '../cars/cars.validation';
 
 const joi = Router.Joi;
 
-const carBaseJoiSchema = {
-  numberPlate: joi.string().required(),
+export const routeBaseJoiSchema = {
+  departure: joi.string().required(),
+  arrival: joi.string().required(),
+  distance: joi.number().required(),
   type: joi.string().valid(...Object.values(CarType)).required(),
-  modelType: joi.string().required(),
-  soldAt: joi.date().required(),
-  mileage: joi.number().required(),
-  status: joi.string().valid(...Object.values(CarStatus)).required(),
 };
 
-export class CarsValidator {
-  static createCar: Router.Config = {
+export class RoutesValidator {
+  static createRoute: Router.Config = {
     meta: {
       swagger: {
-        summary: 'Create car',
-        description: 'Create car instance',
-        tags: ['cars'],
+        summary: 'Create route',
+        description: 'Create route instance',
+        tags: ['routes'],
       },
     },
     validate: {
       type: 'json',
-      body: { ...carBaseJoiSchema },
+      body: { ...routeBaseJoiSchema },
       output: {
         201: {
           body: {
             _id: joi.string().required(),
-            ...carBaseJoiSchema,
+            status: joi.string().valid(...Object.values(DeliveryStatus)).required(),
+            ...routeBaseJoiSchema,
           },
         },
         400: {
@@ -40,25 +41,53 @@ export class CarsValidator {
     },
   };
 
-  static getCarById: Router.Config = {
+  static availableCarsToRoute: Router.Config = {
     meta: {
       swagger: {
-        summary: 'Get car',
-        description: 'Get car instance by id',
-        tags: ['cars'],
+        summary: 'Get available cars to route',
+        description: 'Get available cars to route',
+        tags: ['routes'],
       },
     },
     validate: {
       type: 'json',
       params: {
-        carId: joi.string().required(),
+        routeId: joi.string().required(),
       },
       output: {
         200: {
           body: {
-            _id: joi.string().required(),
-            ...carBaseJoiSchema,
+            cars: joi.array().items({
+              _id: joi.any().required(),
+              ...carBaseJoiSchema,
+            }),
           },
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static removeRoute: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Romove route',
+        description: 'Delete route from database',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      type: 'json',
+      params: {
+        routeId: joi.string().required(),
+      },
+      output: {
+        204: {
+          body: {},
         },
         404: {
           body: {

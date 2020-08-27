@@ -1,44 +1,61 @@
 import { Context } from 'koa';
 import * as mongoose from 'mongoose';
-import Car, { ICar } from '../cars/schemas/car.schema';
+import Car, { ICar, CarStatus } from '../cars/schemas/car.schema';
+import Route, { DeliveryStatus, IRoute } from './schemas/route.schema';
 
 const { ObjectId } = mongoose.Types;
 
-export class CarsController {
-  static async createCar(ctx: Context) {
-    const { numberPlate, type, modelType, soldAt, mileage, status } = ctx.request.body;
+export class RouteController {
+  static async createRoute(ctx: Context) {
+    const { departure, arrival, distance, type } = ctx.request.body;
 
-    const car = await (new Car({
-      numberPlate,
+    const route = await (new Route({
+      departure,
+      arrival,
+      distance,
       type,
-      modelType,
-      mileage,
-      status,
-      soldAt: new Date(soldAt),
+      status: DeliveryStatus.FREE,
     })).save();
 
     ctx.status = 201;
     ctx.body = {
-      numberPlate,
+      departure,
+      arrival,
       type,
-      modelType,
-      mileage,
-      status,
-      _id: car._id.toString(),
-      soldAt: car.soldAt,
+      distance,
+      status: route.status,
+      _id: route._id.toString(),
     };
   }
 
-  static async getCarById(ctx: Context) {
-    const { carId } = ctx.params;
+  static async removeRoute(ctx: Context) {
+    const { routeId } = ctx.params;
 
-    const car: ICar = (await Car.findOne({ _id: ObjectId(carId) }).select('-__v')).toObject();
-    car._id = car._id.toString();
+    const route: IRoute = await Route.findOne({ _id: ObjectId(routeId) }).select('-__v');
 
-    if (!car) {
-      ctx.throw(404, 'Car with such id does not exist');
+    if (!route) {
+      ctx.throw(404, 'Route with such id does not exist');
     }
 
-    ctx.body = { ...car };
+    await route.remove();
+
+    ctx.status = 204;
+    ctx.body = {};
+  }
+
+  static async availableCarsToRoute(ctx: Context) {
+    const { routeId } = ctx.params;
+
+    const route: IRoute = (await Route.findOne({ _id: ObjectId(routeId) }).select('-__v')).toObject();
+
+    const cars: ICar[] = (await Car.find({ type: route.type, status: CarStatus.FREE })
+    .select('-__v')).map((car) => {
+      const newCar = Object.assign(car.toObject(), {});
+      newCar._id = car._id.toString();
+
+      return newCar;
+    });
+
+    ctx.body = { cars };
   }
 }
