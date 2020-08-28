@@ -25,13 +25,13 @@ export interface IRoute extends Document {
 const routeSchema: Schema = new Schema({
   departure: { type: String, required: true },
   arrival: { type: String, required: true },
-  distance: { type: String, required: true },
+  distance: { type: Number, required: true },
   type: { type: String, required: true },
   status: { type: String, required: true },
   startedAt: { type: Date },
   deliveredAt: { type: Date },
   earnings: { type: Number },
-  car: { ref: Car, type: mongoose.Schema.Types.ObjectId },
+  car: { ref: Car, type: mongoose.Schema.Types.ObjectId, default: null },
 });
 
 export default mongoose.model<IRoute>('Route', routeSchema);

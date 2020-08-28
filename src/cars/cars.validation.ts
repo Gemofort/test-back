@@ -68,4 +68,94 @@ export class CarsValidator {
       },
     },
   };
+
+  static searchCars: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Search routes by query parameters',
+        description: 'Search routes by query parameters',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      type: 'json',
+      query: {
+        numberPlate: joi.string(),
+        modelType: joi.string(),
+        type: joi.string().valid(...Object.values(CarType)),
+        soldAt: joi.date(),
+        carId: joi.string(),
+        mileage: joi.number(),
+      },
+      output: {
+        200: {
+          body: joi.any(),
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static deleteCar: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Remove car',
+        description: 'Delete car instance by id',
+        tags: ['cars'],
+      },
+    },
+    validate: {
+      type: 'json',
+      params: {
+        carId: joi.string().required(),
+      },
+      output: {
+        204: {
+          body: {},
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static updateCar: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Modify car',
+        description: 'Modify car instance by id',
+        tags: ['cars'],
+      },
+    },
+    validate: {
+      type: 'json',
+      params: {
+        carId: joi.string().required(),
+      },
+      body: {
+        numberPlate: joi.string(),
+        type: joi.string().valid(...Object.values(CarType)),
+        modelType: joi.string(),
+        soldAt: joi.date(),
+        mileage: joi.number(),
+      },
+      output: {
+        204: {
+          body: {},
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
 }

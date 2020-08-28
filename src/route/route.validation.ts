@@ -75,7 +75,7 @@ export class RoutesValidator {
   static removeRoute: Router.Config = {
     meta: {
       swagger: {
-        summary: 'Romove route',
+        summary: 'Remove route',
         description: 'Delete route from database',
         tags: ['routes'],
       },
@@ -127,11 +127,78 @@ export class RoutesValidator {
     },
   };
 
+  static submitRoute: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Submit route',
+        description: 'Submit route and update route and car instances',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      params: {
+        routeId: joi.string().required(),
+        carId: joi.string().required(),
+      },
+      output: {
+        204: {
+          body: {},
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static searchRoutes: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Search routes by query parameters',
+        description: 'Search routes by query parameters',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      type: 'json',
+      query: {
+        departure: joi.string(),
+        arrival: joi.string(),
+        type: joi.string().valid(...Object.values(CarType)),
+        status: joi.string().valid(...Object.values(DeliveryStatus)),
+        carId: joi.string(),
+        routeId: joi.string(),
+      },
+      output: {
+        200: {
+          body: { routes: joi.array().items({
+            ...routeBaseJoiSchema,
+            _id: joi.string().required(),
+            status: joi.string().valid(...Object.values(DeliveryStatus)),
+            startedAt: joi.date(),
+            car: joi.object({
+              ...carBaseJoiSchema,
+              _id: joi.string().required(),
+              __v: joi.number(),
+            }),
+          }).required() },
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
   static updateRoute: Router.Config = {
     meta: {
       swagger: {
-        summary: 'Setup car to route',
-        description: 'Setup car to route',
+        summary: 'Update route',
+        description: 'Update route',
         tags: ['routes'],
       },
     },
@@ -143,7 +210,7 @@ export class RoutesValidator {
       body: {
         departure: joi.string(),
         arrival: joi.string(),
-        distance: joi.string(),
+        distance: joi.number(),
         type: joi.string(),
       },
       output: {

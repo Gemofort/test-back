@@ -17,4 +17,22 @@ carsRouter.get(
   CarsController.getCarById,
 );
 
+carsRouter.get(
+  '/cars',
+  CarsValidator.searchCars,
+  CarsController.searchCars,
+);
+
+carsRouter.delete(
+  '/cars/:carId',
+  CarsValidator.deleteCar,
+  CarsController.deleteCar,
+);
+
+carsRouter.put(
+  '/cars/:carId',
+  CarsValidator.updateCar,
+  CarsController.updateCar,
+);
+
 export default carsRouter;

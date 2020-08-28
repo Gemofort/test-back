@@ -12,6 +12,12 @@ routesRouter.post(
 );
 
 routesRouter.get(
+  '/routes',
+  RoutesValidator.searchRoutes,
+  RouteController.searchRoutes,
+);
+
+routesRouter.get(
   '/routes/:routeId/cars',
   RoutesValidator.availableCarsToRoute,
   RouteController.availableCarsToRoute,
@@ -27,6 +33,12 @@ routesRouter.put(
   '/routes/:routeId/cars',
   RoutesValidator.setupAvailableCarsToRoute,
   RouteController.setupAvailableCarsToRoute,
+);
+
+routesRouter.put(
+  '/routes/:routeId/cars/:carId',
+  RoutesValidator.submitRoute,
+  RouteController.submitRoute,
 );
 
 routesRouter.delete(

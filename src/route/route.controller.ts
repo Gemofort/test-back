@@ -1,10 +1,12 @@
 import { Context } from 'koa';
 import * as mongoose from 'mongoose';
-import Car, { ICar, CarStatus } from '../cars/schemas/car.schema';
+import Car, { ICar, CarStatus, CarType } from '../cars/schemas/car.schema';
 import Route, { DeliveryStatus, IRoute } from './schemas/route.schema';
-import { carBaseJoiSchema } from 'src/cars/cars.validation';
+import calculator, { CalcResponse } from '../helpers/calculator';
 
 const { ObjectId } = mongoose.Types;
+
+type ObjectId = mongoose.Types.ObjectId;
 
 export class RouteController {
   static async createRoute(ctx: Context) {
@@ -67,11 +69,38 @@ export class RouteController {
     ctx.body = { cars };
   }
 
+  static async searchRoutes(ctx: Context) {
+    const { departure, arrival, type, status, carId, routeId } = ctx.query;
+
+    const searchObject: any = {};
+
+    if (departure) searchObject.departure = departure;
+    if (arrival) searchObject.arrival = arrival;
+    if (type) searchObject.type = type;
+    if (status) searchObject.status = status;
+    if (carId) searchObject.car = ObjectId(carId);
+    if (routeId) searchObject._id = ObjectId(routeId);
+
+    const routes: any[] = (await Route.find(searchObject).select('-__v').populate('car'))
+      .map((route: any) => {
+        const bufRoute = route.toObject();
+        bufRoute._id = route._id.toString();
+
+        if (route.car) {
+          bufRoute.car._id = route.car._id.toString();
+        }
+
+        return bufRoute;
+      });
+
+    ctx.body = { routes };
+  }
+
   static async setupAvailableCarsToRoute(ctx: Context) {
     const { routeId } = ctx.params;
     const { carId } = ctx.request.body;
 
-    const route: IRoute = (await Route.findOne({ _id: ObjectId(routeId) }).select('-__v')).toObject();
+    const route: IRoute = await Route.findOne({ _id: ObjectId(routeId) }).select('-__v');
 
     if (!route) {
       ctx.throw(404, 'Route with such id does not exist');
@@ -95,11 +124,42 @@ export class RouteController {
     ctx.body = {};
   }
 
+  static async submitRoute(ctx: Context) {
+    const { routeId, carId } = ctx.params;
+
+    const route: any = await Route.findOne({ _id: ObjectId(routeId) }).populate('car').select('-__v');
+
+    console.log(route);
+
+    if (!route) {
+      ctx.throw(404, 'Route with such id does not exist');
+    }
+
+    if (!route.car || route.car._id.toString() !== carId) {
+      ctx.throw(404, 'Car with such id is not submitted for this route');
+    }
+
+    const calculation: CalcResponse = calculator(route, route.car);
+
+    const car = route.car;
+
+    route.earnings = calculation.route.earnings;
+    route.status = calculation.route.status;
+
+    car.mileage = calculation.car.mileage;
+    car.status = calculation.car.status;
+
+    await Promise.all([route.save(), car.save()]);
+
+    ctx.status = 204;
+    ctx.body = {};
+  }
+
   static async updateRoute(ctx: Context) {
     const { routeId } = ctx.params;
-    const { departure, arrival, distance, type } = ctx.params;
+    const { departure, arrival, distance, type } = ctx.request.body;
 
-    const route: IRoute = (await Route.findOne({ _id: ObjectId(routeId) }).select('-__v')).toObject();
+    const route: IRoute = await Route.findOne({ _id: ObjectId(routeId) }).select('-__v');
 
     if (!route) {
       ctx.throw(404, 'Route with such id does not exist');
