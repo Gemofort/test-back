@@ -97,4 +97,65 @@ export class RoutesValidator {
       },
     },
   };
+
+  static setupAvailableCarsToRoute: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Setup car to route',
+        description: 'Setup car to route',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      type: 'json',
+      params: {
+        routeId: joi.string().required(),
+      },
+      body: {
+        carId: joi.string().required(),
+      },
+      output: {
+        204: {
+          body: {},
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static updateRoute: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Setup car to route',
+        description: 'Setup car to route',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      type: 'json',
+      params: {
+        routeId: joi.string().required(),
+      },
+      body: {
+        departure: joi.string(),
+        arrival: joi.string(),
+        distance: joi.string(),
+        type: joi.string(),
+      },
+      output: {
+        204: {
+          body: {},
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
 }

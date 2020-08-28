@@ -17,6 +17,18 @@ routesRouter.get(
   RouteController.availableCarsToRoute,
 );
 
+routesRouter.put(
+  '/routes/:routeId',
+  RoutesValidator.updateRoute,
+  RouteController.updateRoute,
+);
+
+routesRouter.put(
+  '/routes/:routeId/cars',
+  RoutesValidator.setupAvailableCarsToRoute,
+  RouteController.setupAvailableCarsToRoute,
+);
+
 routesRouter.delete(
   '/routes/:routeId',
   RoutesValidator.removeRoute,
