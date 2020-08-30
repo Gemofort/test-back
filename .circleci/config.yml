@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build&lint:
     working_directory: ~/circleci-test-back
     docker:
       - image: circleci/node:12.16.1
@@ -21,3 +21,7 @@ jobs:
           name: Lint
           command: |
             npm run lint
+      - run:
+          name: Build
+          command: |
+            npm run build
