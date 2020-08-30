@@ -23,7 +23,7 @@ export class CarsController {
       type,
       modelType,
       mileage,
-      status,
+      status: car.status,
       _id: car._id.toString(),
       soldAt: car.soldAt,
     };
@@ -43,7 +43,24 @@ export class CarsController {
   }
 
   static async searchCars(ctx: Context) {
-    ctx.body = {};
+    const { numberPlate, modelType, type, status } = ctx.query;
+
+    const searchObject: any = {};
+
+    if (numberPlate) searchObject.numberPlate = { $regex: new RegExp(numberPlate, 'i') };
+    if (modelType) searchObject.modelType = { $regex: new RegExp(modelType, 'i') };
+    if (type) searchObject.type = type;
+    if (status) searchObject.status = status;
+
+    const cars: any[] = (await Car.find(searchObject).select('-__v'))
+      .map((car: ICar) => {
+        const bufCar = car.toObject();
+        bufCar._id = car._id.toString();
+
+        return bufCar;
+      });
+
+    ctx.body = { cars };
   }
 
   static async deleteCar(ctx: Context) {

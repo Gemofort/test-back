@@ -49,7 +49,6 @@ export class CarsValidator {
       },
     },
     validate: {
-      type: 'json',
       params: {
         carId: joi.string().required(),
       },
@@ -78,14 +77,11 @@ export class CarsValidator {
       },
     },
     validate: {
-      type: 'json',
       query: {
         numberPlate: joi.string(),
         modelType: joi.string(),
         type: joi.string().valid(...Object.values(CarType)),
-        soldAt: joi.date(),
-        carId: joi.string(),
-        mileage: joi.number(),
+        status: joi.string().valid(...Object.values(CarStatus)),
       },
       output: {
         200: {
@@ -109,7 +105,6 @@ export class CarsValidator {
       },
     },
     validate: {
-      type: 'json',
       params: {
         carId: joi.string().required(),
       },

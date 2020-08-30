@@ -50,7 +50,6 @@ export class RoutesValidator {
       },
     },
     validate: {
-      type: 'json',
       params: {
         routeId: joi.string().required(),
       },
@@ -162,7 +161,6 @@ export class RoutesValidator {
       },
     },
     validate: {
-      type: 'json',
       query: {
         departure: joi.string(),
         arrival: joi.string(),
@@ -178,12 +176,49 @@ export class RoutesValidator {
             _id: joi.string().required(),
             status: joi.string().valid(...Object.values(DeliveryStatus)),
             startedAt: joi.date(),
+            earnings: joi.number(),
             car: joi.object({
               ...carBaseJoiSchema,
               _id: joi.string().required(),
               __v: joi.number(),
-            }),
+            }).allow(null),
           }).required() },
+        },
+        404: {
+          body: {
+            error: joi.string(),
+          },
+        },
+      },
+    },
+  };
+
+  static getRouteById: Router.Config = {
+    meta: {
+      swagger: {
+        summary: 'Search routes by query parameters',
+        description: 'Search routes by query parameters',
+        tags: ['routes'],
+      },
+    },
+    validate: {
+      params: {
+        routeId: joi.string(),
+      },
+      output: {
+        200: {
+          body: {
+            ...routeBaseJoiSchema,
+            _id: joi.string().required(),
+            status: joi.string().valid(...Object.values(DeliveryStatus)),
+            startedAt: joi.date(),
+            earnings: joi.number(),
+            car: joi.object({
+              ...carBaseJoiSchema,
+              _id: joi.string().required(),
+              __v: joi.number(),
+            }).allow(null),
+          },
         },
         404: {
           body: {

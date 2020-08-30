@@ -30,7 +30,7 @@ const routeSchema: Schema = new Schema({
   status: { type: String, required: true },
   startedAt: { type: Date },
   deliveredAt: { type: Date },
-  earnings: { type: Number },
+  earnings: { type: Number, default: 0 },
   car: { ref: Car, type: mongoose.Schema.Types.ObjectId, default: null },
 });
 

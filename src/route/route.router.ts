@@ -18,6 +18,12 @@ routesRouter.get(
 );
 
 routesRouter.get(
+  '/routes/:routeId',
+  RoutesValidator.getRouteById,
+  RouteController.getRouteById,
+);
+
+routesRouter.get(
   '/routes/:routeId/cars',
   RoutesValidator.availableCarsToRoute,
   RouteController.availableCarsToRoute,

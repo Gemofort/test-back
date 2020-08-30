@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose';
 import Car, { ICar, CarStatus, CarType } from '../cars/schemas/car.schema';
 import Route, { DeliveryStatus, IRoute } from './schemas/route.schema';
 import calculator, { CalcResponse } from '../helpers/calculator';
+import routesRouter from './route.router';
 
 const { ObjectId } = mongoose.Types;
 
@@ -74,8 +75,8 @@ export class RouteController {
 
     const searchObject: any = {};
 
-    if (departure) searchObject.departure = departure;
-    if (arrival) searchObject.arrival = arrival;
+    if (departure) searchObject.departure = { $regex: new RegExp(departure, 'i') };
+    if (arrival) searchObject.arrival = { $regex: new RegExp(arrival, 'i') };
     if (type) searchObject.type = type;
     if (status) searchObject.status = status;
     if (carId) searchObject.car = ObjectId(carId);
@@ -96,6 +97,27 @@ export class RouteController {
     ctx.body = { routes };
   }
 
+  static async getRouteById(ctx: Context) {
+    const { routeId } = ctx.params;
+
+    const route: any = (await Route.findOne({ _id: ObjectId(routeId) }).select('-__v').populate('car')).toObject();
+
+    if (!route) {
+      ctx.throw(404, 'Route with such id does not exist');
+    }
+    route._id = route._id.toString();
+
+    console.log(route);
+
+    if (route.car) {
+      route.car._id = route.car._id.toString();
+    }
+
+    console.log(route);
+
+    ctx.body = { ...route };
+  }
+
   static async setupAvailableCarsToRoute(ctx: Context) {
     const { routeId } = ctx.params;
     const { carId } = ctx.request.body;
@@ -110,6 +132,10 @@ export class RouteController {
 
     if (!car) {
       ctx.throw(404, 'Car with such id is not available');
+    }
+
+    if (route.car) {
+      ctx.throw(400, 'Another car is already assigned to route');
     }
 
     route.car = car._id;
@@ -128,8 +154,6 @@ export class RouteController {
     const { routeId, carId } = ctx.params;
 
     const route: any = await Route.findOne({ _id: ObjectId(routeId) }).populate('car').select('-__v');
-
-    console.log(route);
 
     if (!route) {
       ctx.throw(404, 'Route with such id does not exist');
@@ -163,6 +187,10 @@ export class RouteController {
 
     if (!route) {
       ctx.throw(404, 'Route with such id does not exist');
+    }
+
+    if (!route.car && route.status === DeliveryStatus.PENDING) {
+      ctx.throw(400, 'You cannot update route while it is in pending status');
     }
 
     if (departure) route.departure = departure;
